@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHAOS.SYS // ATTRACTOR DYNAMICS TERMINAL</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ──────────────────────────────────────────────────────── */
+/*  RESET & ROOT                                            */
+/* ──────────────────────────────────────────────────────── */
+*{margin:0;padding:0;box-sizing:border-box;}
+
+:root{
+  --amber:       #FF9500;
+  --amber-dim:   #7A4200;
+  --amber-pale:  #CC7700;
+  --amber-hot:   #FFD060;
+  --amber-glow:  rgba(255,149,0,0.25);
+  --green:       #00CC55;
+  --green-dim:   #005522;
+  --green-hot:   #88FFBB;
+  --green-glow:  rgba(0,204,85,0.2);
+  --teal:        #00BBAA;
+  --red:         #FF2200;
+  --bg:          #060403;
+  --bg2:         #0C0804;
+  --metal-1:     #0E0A06;
+  --metal-2:     #1C1510;
+  --metal-3:     #2C2018;
+  --rule-color:  #2A1C0C;
+  --text-dim:    #6A4A20;
+  --text-mid:    #9A6A30;
+}
+
+/* ──────────────────────────────────────────────────────── */
+/*  BODY & BACKGROUND                                       */
+/* ──────────────────────────────────────────────────────── */
+html,body{
+  background:var(--bg);
+  color:var(--amber-pale);
+  font-family:'Share Tech Mono',monospace;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* Fine horizontal-line grain across whole page */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255,100,0,0.012) 3px,
+    rgba(255,100,0,0.012) 4px
+  );
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Subtle radial gradient — center slightly lighter */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:radial-gradient(ellipse 120% 80% at 50% 40%,
+    rgba(40,25,5,0.0) 0%,
+    rgba(0,0,0,0.55) 100%
+  );
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ──────────────────────────────────────────────────────── */
+/*  HEADER                                                  */
+/* ──────────────────────────────────────────────────────── */
+header{
+  position:relative;
+  z-index:20;
+  padding:14px 28px 10px;
+  border-bottom:1px solid var(--rule-color);
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:20px;
+  background:linear-gradient(180deg,rgba(20,12,4,0.9) 0%,transparent 100%);
+}
+
+.hdr-left{}
+.hdr-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(0.85rem,2.5vw,1.3rem);
+  font-weight:900;
+  letter-spacing:0.25em;
+  color:var(--amber-hot);
+  text-shadow:0 0 18px var(--amber),0 0 36px rgba(255,149,0,0.35);
+  white-space:nowrap;
+}
+.hdr-sub{
+  font-size:0.6rem;
+  color:var(--text-dim);
+  letter-spacing:0.18em;
+  margin-top:5px;
+}
+
+.hdr-right{
+  text-align:right;
+  font-size:0.6rem;
+  color:var(--text-mid);
+  letter-spacing:0.1em;
+  line-height:1.8;
+  white-space:nowrap;
+}
+.hdr-clock{color:var(--amber);}
+.hdr-node{color:var(--teal);}
+
+/* ──────────────────────────────────────────────────────── */
+/*  MAIN LAYOUT                                             */
+/* ──────────────────────────────────────────────────────── */
+main{
+  position:relative;
+  z-index:10;
+  display:flex;
+  gap:24px;
+  padding:20px 22px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+/* ──────────────────────────────────────────────────────── */
+/*  ATTRACTOR PANEL                                         */
+/* ──────────────────────────────────────────────────────── */
+.panel{
+  flex:1;
+  min-width:290px;
+  max-width:520px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* Panel title bar */
+.panel-titlebar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:5px 10px;
+  border-left:3px solid var(--amber);
+  background:linear-gradient(90deg,rgba(255,149,0,0.07) 0%,transparent 80%);
+}
+.panel.green .panel-titlebar{
+  border-left-color:var(--green);
+  background:linear-gradient(90deg,rgba(0,204,85,0.07) 0%,transparent 80%);
+}
+
+.panel-sysid{
+  font-size:0.55rem;
+  color:var(--teal);
+  letter-spacing:0.2em;
+}
+.panel-name{
+  font-family:'Orbitron',sans-serif;
+  font-size:0.82rem;
+  font-weight:700;
+  letter-spacing:0.12em;
+  color:var(--amber-hot);
+  text-shadow:0 0 10px var(--amber-glow);
+}
+.panel.green .panel-name{
+  color:var(--green-hot);
+  text-shadow:0 0 10px var(--green-glow);
+}
+
+/* Decorative corner bracket system */
+.bracket{
+  font-size:0.55rem;
+  color:var(--amber-dim);
+  letter-spacing:0.05em;
+  line-height:1.4;
+}
+.panel.green .bracket{color:var(--green-dim);}
+
+/* Info block grid (above and below CRT) */
+.info-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.info-row.triple{
+  grid-template-columns:1fr 1fr 1fr;
+}
+
+.iblock{
+  border:1px solid var(--rule-color);
+  border-top:1px solid var(--amber-dim);
+  padding:7px 9px;
+  background:rgba(20,12,4,0.6);
+  font-size:0.6rem;
+  line-height:1.65;
+  color:var(--text-mid);
+  position:relative;
+}
+.panel.green .iblock{
+  border-top-color:var(--green-dim);
+}
+.iblock.span2{grid-column:1/-1;}
+.iblock.span3{grid-column:1/-1;}
+
+.ilabel{
+  display:block;
+  font-size:0.52rem;
+  letter-spacing:0.18em;
+  color:var(--teal);
+  margin-bottom:4px;
+}
+.ival{color:var(--amber-hot);font-size:0.65rem;}
+.panel.green .ival{color:var(--green-hot);}
+.ired{color:var(--red)!important;}
+.igreen{color:var(--teal);}
+
+/* Equations */
+.eq{
+  font-size:0.63rem;
+  line-height:2;
+  letter-spacing:0.04em;
+}
+.eq-v{color:var(--amber-hot);}
+.eq-p{color:var(--teal);}
+.panel.green .eq-v{color:var(--green-hot);}
+
+/* ──────────────────────────────────────────────────────── */
+/*  CRT DISPLAY                                             */
+/* ──────────────────────────────────────────────────────── */
+.crt-housing{
+  position:relative;
+  /* Industrial metal bezel */
+  background:
+    linear-gradient(135deg,#201508 0%,#120D06 40%,#0A0703 70%,#181006 100%);
+  border:1px solid #2A1C0C;
+  border-bottom:2px solid #0A0703;
+  border-right:2px solid #0A0703;
+  padding:14px 14px 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,180,60,0.06),
+    inset 0 0 40px rgba(0,0,0,0.7),
+    0 6px 30px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(0,0,0,0.9);
+}
+
+/* Rivet corners */
+.crt-housing::before{
+  content:'◈  ◈';
+  position:absolute;
+  top:5px;left:0;right:0;
+  font-size:8px;
+  color:#2A1C0C;
+  text-align:center;
+  letter-spacing:82px;
+  pointer-events:none;
+}
+.crt-housing::after{
+  content:'◈  ◈';
+  position:absolute;
+  bottom:8px;left:0;right:0;
+  font-size:8px;
+  color:#2A1C0C;
+  text-align:center;
+  letter-spacing:82px;
+  pointer-events:none;
+}
+
+/* The glass tube surface */
+.crt-screen{
+  position:relative;
+  overflow:hidden;
+  border-radius:4px;
+  background:#000;
+  box-shadow:
+    inset 0 0 80px rgba(0,0,0,0.95),
+    inset 0 0 25px rgba(0,0,0,0.6);
+  /* Subtle CRT flicker */
+  animation:crt-flicker 7s infinite;
+}
+
+@keyframes crt-flicker{
+  0%,93%,100%{opacity:1;}
+  94%{opacity:0.91;}
+  95%{opacity:1;}
+  97%{opacity:0.95;}
+}
+
+canvas.attractor{
+  display:block;
+  width:100%;
+  height:320px;
+}
+
+/* CSS overlays stacked above canvas */
+.scanlines{
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.22) 2px,
+    rgba(0,0,0,0.22) 4px
+  );
+  pointer-events:none;
+  z-index:5;
+}
+.vignette{
+  position:absolute;
+  inset:0;
+  background:radial-gradient(
+    ellipse at 50% 50%,
+    transparent 45%,
+    rgba(0,0,0,0.75) 100%
+  );
+  pointer-events:none;
+  z-index:4;
+}
+.phosphor-glare{
+  position:absolute;
+  top:0;left:5%;right:5%;
+  height:35%;
+  background:linear-gradient(180deg,rgba(255,255,255,0.018) 0%,transparent 100%);
+  border-radius:50% 50% 0 0 / 100% 100% 0 0;
+  pointer-events:none;
+  z-index:6;
+}
+/* Screen-edge inner shadow (CRT tube depth) */
+.tube-edge{
+  position:absolute;
+  inset:0;
+  box-shadow:inset 0 0 18px rgba(0,0,0,0.9);
+  border-radius:4px;
+  pointer-events:none;
+  z-index:7;
+}
+
+/* Signal-lost overlay (used by JS) */
+.sig-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.65rem;
+  letter-spacing:0.25em;
+  color:rgba(255,149,0,0.5);
+  z-index:9;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.05s;
+}
+.panel.green .sig-overlay{color:rgba(0,200,80,0.5);}
+
+/* ──────────────────────────────────────────────────────── */
+/*  STATUS BAR (below CRT)                                  */
+/* ──────────────────────────────────────────────────────── */
+.statusbar{
+  display:flex;
+  gap:16px;
+  font-size:0.57rem;
+  color:var(--text-dim);
+  border-top:1px solid var(--rule-color);
+  padding:6px 0 0;
+  flex-wrap:wrap;
+}
+.dot{
+  display:inline-block;
+  width:5px;height:5px;
+  border-radius:50%;
+  background:var(--amber);
+  margin-right:5px;
+  vertical-align:middle;
+  animation:dot-pulse 1.4s ease-in-out infinite;
+}
+.panel.green .dot{background:var(--green);}
+@keyframes dot-pulse{
+  0%,100%{opacity:1;}50%{opacity:0.2;}
+}
+.spt{color:var(--amber-pale);}
+.panel.green .spt{color:var(--green);}
+
+/* ──────────────────────────────────────────────────────── */
+/*  FOOTER                                                  */
+/* ──────────────────────────────────────────────────────── */
+footer{
+  position:relative;
+  z-index:20;
+  border-top:1px solid var(--rule-color);
+  padding:10px 28px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:0.55rem;
+  color:var(--text-dim);
+  letter-spacing:0.1em;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.ft-hex{color:var(--text-dim);font-size:0.58rem;letter-spacing:0.15em;}
+
+/* ──────────────────────────────────────────────────────── */
+/*  GLITCH ANIMATIONS                                       */
+/* ──────────────────────────────────────────────────────── */
+@keyframes glitch-h{
+  0%,90%,100%{transform:translateX(0);filter:none;}
+  91%{transform:translateX(-4px);filter:hue-rotate(60deg);}
+  93%{transform:translateX(3px);filter:hue-rotate(-40deg);}
+  95%{transform:translateX(-2px);filter:none;}
+}
+.glitch-el{animation:glitch-h 6s infinite;}
+.glitch-el2{animation:glitch-h 9s 2s infinite;}
+.glitch-el3{animation:glitch-h 4.5s 1s infinite;}
+
+/* ──────────────────────────────────────────────────────── */
+/*  RESPONSIVE                                              */
+/* ──────────────────────────────────────────────────────── */
+@media(max-width:680px){
+  main{padding:14px;}
+  .info-row.triple{grid-template-columns:1fr 1fr;}
+  canvas.attractor{height:240px;}
+  .hdr-sub{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  HEADER                                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<header>
+  <div class="hdr-left">
+    <div class="hdr-title glitch-el">CHAOS.SYS // ATTRACTOR DYNAMICS MODULE</div>
+    <div class="hdr-sub">▸ ANÁLISIS DE SISTEMAS DINÁMICOS NO-LINEALES ◂ INTEGRADOR RUNGE-KUTTA 4° ORDEN ◂ MÓDULO v2.3.1</div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-clock" id="clock">--:--:--</div>
+    <div class="hdr-node">NODE: DELTA-7 ■ SECTOR: C-4</div>
+    <div>PROC: <span style="color:var(--amber)">EXEC</span> ■ MEM: <span id="memval">--</span>K</div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  MAIN                                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- ─────────────────────────────────────────────── -->
+  <!--  LORENZ PANEL  (amber)                          -->
+  <!-- ─────────────────────────────────────────────── -->
+  <div class="panel" id="p-lorenz">
+
+    <div class="panel-titlebar">
+      <span class="panel-sysid">SYS:ATR-001</span>
+      <span class="panel-name glitch-el2" id="lor-name">ATRACTOR DE LORENZ</span>
+    </div>
+
+    <!-- Info ABOVE crt -->
+    <div class="info-row triple">
+      <div class="iblock">
+        <span class="ilabel">▸ DESCUBRIDOR</span>
+        <span class="iblock-body" id="g-l-auth">
+          EDWARD N. LORENZ<br>
+          <span class="ival">MIT // DEPT. METEOROLOGÍA</span><br>
+          <span class="igreen">AÑO: 1963</span>
+        </span>
+      </div>
+      <div class="iblock">
+        <span class="ilabel">▸ CLASIFICACIÓN</span>
+        <span id="g-l-class">
+          ATRACTOR EXTRAÑO<br>
+          <span class="ival">SISTEMA CAÓTICO</span><br>
+          FLUJO CONVECTIVO
+        </span>
+      </div>
+      <div class="iblock">
+        <span class="ilabel">▸ TOPOLOGÍA</span>
+        <span id="g-l-topo">
+          DOS LÓBULOS<br>
+          <span class="ival">FORMA: MARIPOSA</span><br>
+          SALTOS ESTOCÁSTICOS
+        </span>
+      </div>
+    </div>
+
+    <!-- CRT SCREEN -->
+    <div class="crt-housing">
+      <div class="crt-screen">
+        <canvas class="attractor" id="c-lorenz"></canvas>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+        <div class="phosphor-glare"></div>
+        <div class="tube-edge"></div>
+        <div class="sig-overlay" id="sig-lorenz">// SEÑAL PERDIDA //</div>
+      </div>
+    </div>
+
+    <!-- Info BELOW crt -->
+    <div class="info-row">
+      <div class="iblock span2">
+        <span class="ilabel">▸ ECUACIONES DIFERENCIALES ORDINARIAS</span>
+        <div class="eq" id="g-l-eq">
+          <span class="eq-v">ẋ</span> = <span class="eq-p">σ</span>(<span class="eq-v">y</span> − <span class="eq-v">x</span>)
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          [<span class="eq-p">σ</span> = <span class="ival">10.000</span>]<br>
+          <span class="eq-v">ẏ</span> = <span class="eq-v">x</span>(<span class="eq-p">ρ</span> − <span class="eq-v">z</span>) − <span class="eq-v">y</span>
+          &nbsp;
+          [<span class="eq-p">ρ</span> = <span class="ival">28.000</span>]<br>
+          <span class="eq-v">ż</span> = <span class="eq-v">x</span><span class="eq-v">y</span> − <span class="eq-p">β</span><span class="eq-v">z</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          [<span class="eq-p">β</span> = <span class="ival">8/3</span>]
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row triple">
+      <div class="iblock">
+        <span class="ilabel">▸ MÉTRICAS</span>
+        <span id="g-l-met">
+          DIM. FRACTAL<br>
+          <span class="ival">D ≈ 2.062</span><br>
+          <span class="igreen">HAUSDORFF</span>
+        </span>
+      </div>
+      <div class="iblock">
+        <span class="ilabel">▸ LYAPUNOV</span>
+        <span id="g-l-lyap">
+          λ₁ = <span class="ival">+0.9056</span><br>
+          λ₂ = <span class="igreen">0.0000</span><br>
+          λ₃ = <span class="ired">-14.572</span>
+        </span>
+      </div>
+      <div class="iblock">
+        <span class="ilabel">▸ NO-LINEALIDADES</span>
+        <span id="g-l-nlin">
+          TÉRMINOS: <span class="ival">2</span><br>
+          <span class="igreen">xy</span> // <span class="igreen">xz</span><br>
+          EN 2 ECUACIONES
+        </span>
+      </div>
+    </div>
+
+    <div class="iblock" style="margin-top:0;">
+      <span class="ilabel">▸ ADVERTENCIA OPERACIONAL</span>
+      <span id="g-l-warn" style="font-size:0.6rem;line-height:1.65;">
+        DOS TRAYECTORIAS CON SEPARACIÓN INICIAL Δ=10⁻⁴ DIVERGEN EXPONENCIALMENTE.
+        TASA DE DIVERGENCIA: e^(λ₁·t). PREDICCIÓN A LARGO PLAZO:
+        <span class="ired">// IMPOSIBLE //</span> — EFECTO MARIPOSA CONFIRMADO
+      </span>
+    </div>
+
+    <div class="statusbar">
+      <span><span class="dot"></span>RK4 INTEGRACIÓN ACTIVA</span>
+      <span class="spt" id="l-pts">PTS: —</span>
+      <span>DT: <span class="spt">0.005</span></span>
+      <span>ROT: <span class="spt">CONTINUA</span></span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────── -->
+  <!--  RÖSSLER PANEL  (green)                         -->
+  <!-- ─────────────────────────────────────────────── -->
+  <div class="panel green" id="p-rossler">
+
+    <div class="panel-titlebar">
+      <span class="panel-sysid">SYS:ATR-002</span>
+      <span class="panel-name glitch-el3" id="ros-name">ATRACTOR DE RÖSSLER</span>
+    </div>
+
+    <!-- Info ABOVE crt -->
+    <div class="info-row triple">
+      <div class="iblock">
+        <span class="ilabel">▸ DESCUBRIDOR</span>
+        <span id="g-r-auth">
+          OTTO E. RÖSSLER<br>
+          <span class="ival">UNIV. TÜBINGEN</span><br>
+          <span class="igreen">AÑO: 1976</span>
+        </span>
+      </div>
+      <div class="iblock">
+        <span class="ilabel">▸ CLASIFICACIÓN</span>
+        <span id="g-r-class">
+          ATRACTOR EXTRAÑO<br>
+          <span class="ival">CAOS MÍNIMO</span><br>
+          MODELO SINTÉTICO
+        </span>
+      </div>
+      <div class="iblock">
+        <span class="ilabel">▸ TOPOLOGÍA</span>
+        <span id="g-r-topo">
+          UN LÓBULO<br>
+          <span class="ival">ESPIRAL + FOLD</span><br>
+          CINTA DE MÖBIUS
+        </span>
+      </div>
+    </div>
+
+    <!-- CRT SCREEN (green phosphor) -->
+    <div class="crt-housing" style="background:linear-gradient(135deg,#081208 0%,#050C06 40%,#030603 70%,#081008 100%);border-color:#0C1E0C;">
+      <div class="crt-screen">
+        <canvas class="attractor" id="c-rossler"></canvas>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+        <div class="phosphor-glare" style="background:linear-gradient(180deg,rgba(100,255,160,0.018) 0%,transparent 100%);"></div>
+        <div class="tube-edge"></div>
+        <div class="sig-overlay" id="sig-rossler">// SEÑAL PERDIDA //</div>
+      </div>
+    </div>
+
+    <!-- Info BELOW crt -->
+    <div class="info-row">
+      <div class="iblock span2">
+        <span class="ilabel">▸ ECUACIONES DIFERENCIALES ORDINARIAS</span>
+        <div class="eq" id="g-r-eq">
+          <span class="eq-v">ẋ</span> = −<span class="eq-v">y</span> − <span class="eq-v">z</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          (lineal)<br>
+          <span class="eq-v">ẏ</span> = <span class="eq-v">x</span> + <span class="eq-p">a</span><span class="eq-v">y</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          [<span class="eq-p">a</span> = <span class="ival">0.200</span>]<br>
+          <span class="eq-v">ż</span> = <span class="eq-p">b</span> + <span class="eq-v">z</span>(<span class="eq-v">x</span> − <span class="eq-p">c</span>)
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          [<span class="eq-p">b</span>=<span class="ival">0.2</span> <span class="eq-p">c</span>=<span class="ival">5.7</span>]
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row triple">
+      <div class="iblock">
+        <span class="ilabel">▸ MÉTRICAS</span>
+        <span id="g-r-met">
+          DIM. FRACTAL<br>
+          <span class="ival">D ≈ 2.012</span><br>
+          <span class="igreen">HAUSDORFF</span>
+        </span>
+      </div>
+      <div class="iblock">
+        <span class="ilabel">▸ LYAPUNOV</span>
+        <span id="g-r-lyap">
+          λ₁ = <span class="ival">+0.0714</span><br>
+          λ₂ = <span class="igreen">0.0000</span><br>
+          λ₃ = <span class="ired">-5.3943</span>
+        </span>
+      </div>
+      <div class="iblock">
+        <span class="ilabel">▸ NO-LINEALIDADES</span>
+        <span id="g-r-nlin">
+          TÉRMINOS: <span class="ival">1</span><br>
+          <span class="igreen">zx</span> // (solo ż)<br>
+          EN 1 ECUACIÓN
+        </span>
+      </div>
+    </div>
+
+    <div class="iblock" style="margin-top:0;">
+      <span class="ilabel">▸ NOTA COMPARATIVA</span>
+      <span id="g-r-note" style="font-size:0.6rem;line-height:1.65;">
+        DISEÑADO COMO MODELO MÍNIMO DE CAOS. MECANISMO: ESTIRAMIENTO + PLEGADO SIMPLE.
+        EXPONENTE LYAPUNOV 12.7× MENOR QUE LORENZ.
+        <span class="igreen">// CONVERGENCIA TOPOLÓGICA: MÖBIUS ITERADA //</span>
+      </span>
+    </div>
+
+    <div class="statusbar">
+      <span><span class="dot"></span>RK4 INTEGRACIÓN ACTIVA</span>
+      <span class="spt" id="r-pts">PTS: —</span>
+      <span>DT: <span class="spt">0.010</span></span>
+      <span>ROT: <span class="spt">CONTINUA</span></span>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  FOOTER                                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<footer>
+  <span>WEYLAND-YUTANI DYNAMICS CORP // DEPT. CAOS &amp; SISTEMAS COMPLEJOS</span>
+  <span class="ft-hex" id="ft-hex">────────────────</span>
+  <span>TERMINAL ΞNODE-7 // ACCESO: NIVEL-3 // <span style="color:var(--red)">RESTRINGIDO</span></span>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  SCRIPTS                                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ══════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const rand = (a,b) => Math.random()*(b-a)+a;
+const randInt = (a,b) => Math.floor(rand(a,b+1));
+
+/* Clock */
+function updateClock(){
+  const n = new Date();
+  const pad = v => String(v).padStart(2,'0');
+  $('clock').textContent = `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+  $('memval').textContent = (6144 + randInt(-8,8)).toString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* Footer hex scrambler */
+const HEX = '0123456789ABCDEF';
+setInterval(()=>{
+  $('ft-hex').textContent = Array.from({length:16},()=>HEX[randInt(0,15)]).join('');
+},150);
+
+/* ══════════════════════════════════════
+   GLITCH TEXT ENGINE
+══════════════════════════════════════ */
+const NOISE = '░▒▓▄▀■□●○◆◇◈×÷±∞∑∂01110100';
+
+const GLITCH_IDS = [
+  'g-l-auth','g-l-class','g-l-topo','g-l-met','g-l-lyap',
+  'g-l-nlin','g-l-warn','lor-name',
+  'g-r-auth','g-r-class','g-r-topo','g-r-met','g-r-lyap',
+  'g-r-nlin','g-r-note','ros-name'
+];
+
+/* Cache original HTML */
+const origHTML = {};
+GLITCH_IDS.forEach(id=>{
+  const el = $(id);
+  if(el) origHTML[id] = el.innerHTML;
+});
+
+/* Corrupt only text nodes, leaving HTML intact */
+function corruptNode(node, intensity){
+  if(node.nodeType === Node.TEXT_NODE){
+    node.textContent = node.textContent.split('').map(c=>{
+      if(/\s/.test(c)) return c;
+      return Math.random() < intensity
+        ? NOISE[randInt(0,NOISE.length-1)]
+        : c;
+    }).join('');
+  } else {
+    node.childNodes.forEach(ch => corruptNode(ch, intensity));
+  }
+}
+
+function glitchEl(id){
+  const el = $(id);
+  if(!el || !origHTML[id]) return;
+
+  const tmp = document.createElement('div');
+  tmp.innerHTML = origHTML[id];
+  const intensity = id.includes('name') ? 0.2 : 0.1;
+  corruptNode(tmp, intensity);
+  el.innerHTML = tmp.innerHTML;
+
+  /* Random translate jitter */
+  const shift = rand(-4,4);
+  el.style.transform = `translateX(${shift}px)`;
+
+  setTimeout(()=>{
+    el.innerHTML = origHTML[id];
+    el.style.transform = '';
+  }, 60 + rand(0,80));
+}
+
+/* Burst: glitch 1-3 elements at once */
+function glitchBurst(){
+  const count = Math.random() < 0.25 ? randInt(2,3) : 1;
+  for(let i=0;i<count;i++){
+    const id = GLITCH_IDS[randInt(0,GLITCH_IDS.length-1)];
+    setTimeout(()=>glitchEl(id), i*40);
+  }
+  /* Schedule next burst */
+  setTimeout(glitchBurst, rand(600, 3000));
+}
+setTimeout(glitchBurst, 800);
+
+/* Occasional "signal lost" flicker */
+function signalFlicker(sigId){
+  const el = $(sigId);
+  if(!el) return;
+  if(Math.random()<0.015){
+    el.style.opacity='1';
+    setTimeout(()=>{ el.style.opacity='0'; }, rand(60,180));
+  }
+}
+
+/* ══════════════════════════════════════
+   RUNGE-KUTTA 4
+══════════════════════════════════════ */
+function rk4(state, deriv, dt){
+  const k1 = deriv(state);
+  const k2 = deriv(state.map((s,i)=>s+k1[i]*dt/2));
+  const k3 = deriv(state.map((s,i)=>s+k2[i]*dt/2));
+  const k4 = deriv(state.map((s,i)=>s+k3[i]*dt));
+  return state.map((s,i)=>s+(k1[i]+2*k2[i]+2*k3[i]+k4[i])*dt/6);
+}
+
+/* Lorenz derivatives */
+function lorenz([x,y,z]){
+  const s=10,r=28,b=8/3;
+  return [s*(y-x), x*(r-z)-y, x*y-b*z];
+}
+
+/* Rössler derivatives */
+function rossler([x,y,z]){
+  const a=0.2,b=0.2,c=5.7;
+  return [-y-z, x+a*y, b+z*(x-c)];
+}
+
+/* ══════════════════════════════════════
+   3D PROJECTION  (oblique isometric)
+══════════════════════════════════════ */
+function project(x,y,z, cx,cy,scale, ry,rx){
+  /* Rotate Y */
+  const cosY=Math.cos(ry), sinY=Math.sin(ry);
+  const x1 = x*cosY + z*sinY;
+  const z1 =-x*sinY + z*cosY;
+  /* Rotate X */
+  const cosX=Math.cos(rx), sinX=Math.sin(rx);
+  const y1 = y*cosX - z1*sinX;
+  return [cx + x1*scale, cy - y1*scale];
+}
+
+/* ══════════════════════════════════════
+   CANVAS SETUP
+══════════════════════════════════════ */
+function initCanvas(id){
+  const canvas = $(id);
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const w = canvas.clientWidth  || 460;
+  const h = canvas.clientHeight || 320;
+  canvas.width  = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return {ctx, W:w, H:h};
+}
+
+/* ══════════════════════════════════════
+   LORENZ RENDERER  (amber phosphor)
+══════════════════════════════════════ */
+function startLorenz(){
+  const {ctx,W,H} = initCanvas('c-lorenz');
+
+  const TRAIL  = 5000;
+  const DT     = 0.005;
+  const SPF    = 10;   /* steps per frame */
+
+  let state = [0.1, 0.0, 0.0];
+  let trail = [];
+  let ry = 0.3, rx = 0.38;
+
+  /* Warm-up: skip transient */
+  for(let i=0;i<3000;i++) state = rk4(state, lorenz, DT);
+
+  /* Normalize Lorenz to roughly [-1,1] */
+  function norm(x,y,z){ return [x/22, y/28, (z-25)/22]; }
+
+  function frame(){
+    /* Advance */
+    for(let i=0;i<SPF;i++){
+      state = rk4(state, lorenz, DT);
+      trail.push(norm(...state));
+      if(trail.length > TRAIL) trail.shift();
+    }
+    ry += 0.0035;
+
+    /* Phosphor fade */
+    ctx.fillStyle = 'rgba(4,2,1,0.16)';
+    ctx.fillRect(0,0,W,H);
+
+    /* Draw trail */
+    const len = trail.length;
+    const cx=W*0.5, cy=H*0.5;
+    const sc = Math.min(W,H)*0.38;
+    const from = Math.max(0, len-3500);
+
+    for(let i=from;i<len;i++){
+      const t = (i-from)/(len-1-from+1);
+      const [x,y,z] = trail[i];
+      const [px,py] = project(x,y,z,cx,cy,sc,ry,rx);
+
+      /* Amber palette: dim orange → bright warm white */
+      const r = Math.round(180 + t*75);
+      const g = Math.round(70  + t*130);
+      const b = Math.round(0   + t*20);
+      const a = 0.08 + t*0.82;
+
+      const size = t > 0.97 ? 2.2 : 0.9;
+
+      if(t > 0.96){
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(255,200,80,0.9)';
+      } else {
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
+      ctx.fillRect(px-size/2, py-size/2, size, size);
+    }
+    ctx.shadowBlur=0;
+
+    /* Random noise pixels (phosphor grain) */
+    if(Math.random()<0.4){
+      for(let n=0;n<15;n++){
+        ctx.fillStyle = `rgba(255,149,0,${rand(0,0.07)})`;
+        ctx.fillRect(rand(0,W),rand(0,H),1,1);
+      }
+    }
+
+    /* Horizontal scan-band flash */
+    if(Math.random()<0.018){
+      ctx.fillStyle = `rgba(255,160,40,0.03)`;
+      ctx.fillRect(0, rand(0,H), W, randInt(1,3));
+    }
+
+    /* Points counter */
+    $('l-pts').textContent = `PTS: ${trail.length}`;
+
+    /* Signal flicker check */
+    signalFlicker('sig-lorenz');
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+/* ══════════════════════════════════════
+   RÖSSLER RENDERER  (green phosphor)
+══════════════════════════════════════ */
+function startRossler(){
+  const {ctx,W,H} = initCanvas('c-rossler');
+
+  const TRAIL  = 5000;
+  const DT     = 0.010;
+  const SPF    = 6;
+
+  let state = [0.1, 0.0, 0.0];
+  let trail = [];
+  let ry = 1.2, rx = 0.3;
+
+  /* Warm-up */
+  for(let i=0;i<2000;i++) state = rk4(state, rossler, DT);
+
+  /* Rössler lives in x,y ∈ [-13,13], z ∈ [0,22], center z~5 */
+  function norm(x,y,z){ return [x/13, y/13, (z-6)/13]; }
+
+  function frame(){
+    for(let i=0;i<SPF;i++){
+      state = rk4(state, rossler, DT);
+      trail.push(norm(...state));
+      if(trail.length > TRAIL) trail.shift();
+    }
+    ry += 0.0028;
+
+    ctx.fillStyle = 'rgba(1,4,2,0.14)';
+    ctx.fillRect(0,0,W,H);
+
+    const len = trail.length;
+    const cx=W*0.5, cy=H*0.5;
+    const sc = Math.min(W,H)*0.40;
+    const from = Math.max(0,len-3500);
+
+    for(let i=from;i<len;i++){
+      const t = (i-from)/(len-1-from+1);
+      const [x,y,z] = trail[i];
+      const [px,py] = project(x,y,z,cx,cy,sc,ry,rx);
+
+      /* Green phosphor: dark teal → bright cyan-white */
+      /* z-channel adds warm amber tint at high z (depth cue) */
+      const zn = (z+0.5)*0.7; /* normalized 0..1 */
+      const r = Math.round((30  + zn*60)*t + 10);
+      const g = Math.round((140 + t*115));
+      const b = Math.round((80  + t*80));
+      const a = 0.08 + t*0.82;
+
+      const size = t > 0.97 ? 2.2 : 0.9;
+
+      if(t>0.96){
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(80,255,160,0.9)';
+      } else {
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.fillStyle = `rgba(${Math.min(255,r)},${Math.min(255,g)},${Math.min(255,b)},${a})`;
+      ctx.fillRect(px-size/2, py-size/2, size, size);
+    }
+    ctx.shadowBlur=0;
+
+    /* Green noise grain */
+    if(Math.random()<0.4){
+      for(let n=0;n<15;n++){
+        ctx.fillStyle = `rgba(0,200,80,${rand(0,0.06)})`;
+        ctx.fillRect(rand(0,W),rand(0,H),1,1);
+      }
+    }
+
+    if(Math.random()<0.018){
+      ctx.fillStyle = `rgba(0,180,80,0.03)`;
+      ctx.fillRect(0, rand(0,H), W, randInt(1,3));
+    }
+
+    $('r-pts').textContent = `PTS: ${trail.length}`;
+    signalFlicker('sig-rossler');
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+/* ══════════════════════════════════════
+   INIT  (after layout is ready)
+══════════════════════════════════════ */
+window.addEventListener('load', ()=>{
+  /* Brief delay so CSS has applied canvas height */
+  setTimeout(()=>{
+    startLorenz();
+    startRossler();
+  }, 120);
+});
+
+/* Resize: crude reload of canvas dims (production would reinit properly) */
+let resizeTimer;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{ /* could reinit here */ }, 500);
+});
+</script>
+</body>
+</html>
