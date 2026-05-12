@@ -1,43 +1,42 @@
-# atractores
-ilustración de 2 atractores extraños
+# CHAOS_CORE: Visualización de Atractores Extraños
 
-The `index.html` file is a dynamically styled and interactive webpage designed as a retrofuturistic terminal for simulating dynamic systems, specifically visualizing attractors like Lorenz and Rössler. Below is a summary:
+Una estación de observación de sistemas dinámicos no lineales. Este laboratorio visualiza la belleza matemática del caos, donde pequeñas variaciones en las condiciones iniciales conducen a resultados divergentes, pero siempre confinados dentro de una estructura geométrica compleja llamada **Atractor**.
 
-### Layout and Styles:
-- **Head Section**:
-  - Utilizes Google Fonts for futuristic typography (`Orbitron` and `Share Tech Mono`).
-  - Styles include:
-    - Custom `:root` variables for theming (amber, green, teal, etc.).
-    - A dark background with gradients, phosphorescent effects, and glitch animations.
-  - The page is responsive and optimized for modern devices.
+## 🌀 Conceptos Fundamentales
 
-- **Header Section**:
-  - Displays a dynamic terminal title with glitch animations, a clock, and system info (e.g., node and sector).
+### ¿Qué es un Atractor Extraño?
+En el estudio de sistemas dinámicos, un atractor es un conjunto de valores numéricos hacia los cuales un sistema tiende a evolucionar. Un atractor se llama "extraño" si tiene una estructura **fractal**. Esto suele ocurrir en sistemas que son caóticos pero deterministas.
 
-- **Main Section**:
-  - Contains two dynamic system panels for `Lorenz` and `Rössler` attractors:
-    - **Unique Panels**:
-      - **Lorenz Attractor**: Amber-themed (non-linear dynamics, butterfly shape visualization).
-      - **Rössler Attractor**: Green-themed (minimal chaos, spiral Möbius ribbon).
-    - **Details**:
-      - Classification, topology, and equations are provided.
-      - Phosphor simulations in CRT-style canvas for attractor visualization.
-      - Metrics (e.g., Lyapunov exponents, fractal dimensions) and operational warnings.
+### Efecto Mariposa
+Técnicamente conocido como *dependencia sensible a las condiciones iniciales*. Es la razón por la cual el clima es difícil de predecir a largo plazo: un cambio minúsculo hoy puede resultar en un estado completamente diferente en el futuro.
 
-- **Footer Section**:
-  - Displays terminal metadata (company, node, access level).
+## 🧪 Sistemas Simulados
 
-### JavaScript Dynamics:
-- **Visual Features**:
-  - Dynamic clocks and scrambled hex footer inspired by glitch effects.
-  - Glitch text generation corrupts specific content temporarily for aesthetic.
+### 1. Atractor de Lorenz (El Vuelo de la Mariposa)
+Originalmente derivado de un modelo simplificado de convección atmosférica por Edward Lorenz en 1963.
+- **Ecuaciones:**
+  - `dx/dt = σ(y - x)`
+  - `dy/dt = x(ρ - z) - y`
+  - `dz/dt = xy - βz`
+- **Visualización:** Dos "alas" o lóbulos por los que la trayectoria orbita de forma impredecible pero nunca se cruza a sí misma.
 
-- **Runge-Kutta Integration:**
-  - Implements the RK4 method for real-time simulation of ordinary differential equations (ODEs) for the attractors.
+### 2. Atractor de Rössler
+Diseñado por Otto Rössler en 1976 con la intención de crear el atractor caótico más simple posible, con solo un término no lineal.
+- **Visualización:** Se asemeja a una cinta de Möbius o un espiral que se dobla sobre sí mismo, representando un flujo caótico más suave y continuo que el de Lorenz.
 
-- **Canvas Graphics**:
-  - Real-time projections for attractors in oblique isometric 3D views.
-  - Includes phosphor grain, scanlines, vignette, and noise effects for retro CRT emulation.
+## 💻 Detalles Técnicos
 
-### Conclusion:
-This file utilizes modern web development techniques (CSS, JS) for an engaging simulation environment themed with chaos and non-linear systems. The attractors’ visualizations run dynamically, enhancing user immersion.
+### Integración Numérica (RK4)
+Para resolver las ecuaciones diferenciales en tiempo real, se utiliza el método de **Runge-Kutta de 4º orden**. Este algoritmo proporciona un equilibrio excelente entre precisión matemática y rendimiento computacional para simulaciones interactivas.
+
+### Renderizado Estético
+- **Proyección Isométrica:** Visualización 3D proyectada en un plano 2D.
+- **Efecto Fósforo:** Simulación de la persistencia lumínica de los antiguos monitores CRT.
+- **Glitch UI:** Interfaz reactiva con animaciones de "corrupción" de datos controlada.
+
+## 🚀 Instalación y Uso
+
+Abre `index.html` en tu navegador o accede a la [Demo en vivo](https://narquileerrado.github.io/atractores/).
+
+---
+*"El caos no es una falta de orden, sino un orden de una complejidad superior."*
